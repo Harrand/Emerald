@@ -100,9 +100,10 @@ namespace eld
 			{
 				case WM_PAINT:
 				{
+					// Draw with whatever colour is in the user settings.
 					PAINTSTRUCT ps;
 					HDC hdc = BeginPaint(hwnd, &ps);
-					FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW+1));
+					FillRect(hdc, &ps.rcPaint, CreateSolidBrush(RGB(0, 0, 0)));
 					EndPaint(hwnd, &ps);
 					return 0;
 				}
