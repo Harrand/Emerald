@@ -18,7 +18,7 @@ namespace eld
 		void set_height(unsigned int h);
 		void set_title(const char* title);
 	private:
-
+		HWND hwnd;
 	};
 
 	static_assert(WindowType<WindowWin32>);
