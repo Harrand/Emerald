@@ -21,6 +21,9 @@ namespace eld
 		{t.set_width(uint)} -> std::same_as<void>;
 		{t.set_height(uint)} -> std::same_as<void>;
 		{t.set_title(cstr)} -> std::same_as<void>;
+		{t.update()} -> std::same_as<void>;
+
+		{t.is_close_requested()} -> std::same_as<bool>;
 	};
 }
 
