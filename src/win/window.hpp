@@ -2,7 +2,11 @@
 #define EMERALD_SRC_WIN_WINDOW_HPP
 #if ELD_WIN
 #include "api/window.hpp"
+
 #include <windows.h>
+
+#include <utility>
+#include <string>
 
 namespace eld
 {
@@ -17,19 +21,20 @@ namespace eld
 		WindowWin32& operator==(WindowWin32&& rhs);
 
 		unsigned int get_width() const;
+		void set_width(unsigned int w);
 		unsigned int get_height() const;
+		void set_height(unsigned int h);
 		const char* get_title() const;
+		void set_title(const char* title);
 
 		void update();
 		bool is_close_requested() const;
-
-		void set_width(unsigned int w);
-		void set_height(unsigned int h);
-		void set_title(const char* title);
 	private:
+		std::pair<int, int> get_window_size() const;
 		MSG get_message();
 		HWND hwnd;
 		bool close_requested = false;
+		mutable std::string window_text = "";
 	};
 
 	static_assert(WindowType<WindowWin32>);

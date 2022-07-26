@@ -6,7 +6,8 @@ int main()
 	{
 		.width = 800,
 		.height = 600,
-		.title = "Emerald Window Demo"
+		.title = "Emerald Window Demo",
+		.intent = eld::WindowRenderingIntent::SoftwareRendering
 	}};
 	while(!wnd.is_close_requested())
 	{

@@ -16,6 +16,7 @@ namespace eld
 	WindowWin32::WindowWin32(WindowInfo info):
 	hwnd(nullptr)
 	{
+		assert(info.intent == WindowRenderingIntent::SoftwareRendering && "Only SoftwareRendering is supported on windows right now im afraid.");
 		// Regardless of the number of windows, a wndclass must exist. Let's make sure we only ever have exactly one.
 		constexpr char wnd_class_name[] = "Emerald Window Class";
 		if(!win_impl::wndclass_registered)
@@ -69,6 +70,41 @@ namespace eld
 		return *this;
 	}
 
+	unsigned int WindowWin32::get_width() const
+	{
+		return static_cast<unsigned int>(this->get_window_size().first);
+	}
+
+	void WindowWin32::set_width(unsigned int w)
+	{
+		bool res = SetWindowPos(this->hwnd, nullptr, 0, 0, static_cast<int>(w), this->get_window_size().second, SWP_NOMOVE);
+		assert(res);
+	}
+
+	unsigned int WindowWin32::get_height() const
+	{
+		return static_cast<unsigned int>(this->get_window_size().second);
+	}
+
+	void WindowWin32::set_height(unsigned int h)
+	{
+		bool res = SetWindowPos(this->hwnd, nullptr, 0, 0, this->get_window_size().first, static_cast<int>(h), SWP_NOMOVE);
+		assert(res);
+	}
+
+	const char* WindowWin32::get_title() const
+	{
+		this->window_text.resize(GetWindowTextLengthA(this->hwnd) + 1);
+		GetWindowTextA(this->hwnd, this->window_text.data(), this->window_text.size());
+		return this->window_text.c_str();
+	}
+
+	void WindowWin32::set_title(const char* title)
+	{
+		this->window_text = title;
+		SetWindowTextA(this->hwnd, title);
+	}
+
 	void WindowWin32::update()
 	{
 		MSG msg = this->get_message();
@@ -83,6 +119,18 @@ namespace eld
 	bool WindowWin32::is_close_requested() const
 	{
 		return this->close_requested;
+	}
+
+	std::pair<int, int> WindowWin32::get_window_size() const
+	{
+		RECT rect;
+		if(GetWindowRect(hwnd, &rect))
+		{
+			int width = rect.right - rect.left;
+			int height = rect.bottom - rect.top;
+			return {width, height};
+		}
+		return {-1, -1};
 	}
 
 	MSG WindowWin32::get_message()

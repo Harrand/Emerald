@@ -5,6 +5,16 @@
 namespace eld
 {
 	/**
+	 * Specifies how you intend to draw into the window.
+	 */
+	enum class WindowRenderingIntent
+	{
+		/// - CPU-side painting functions which eventually call into the OS API. Use this if you want to use the Emerald software rendering API (dev: which doesnt exist yet ;) ).
+		SoftwareRendering,
+		/// - Window surface will be renderered into through a hardware-accelerated graphics API, such as Vulkan or OpenGL. Use this if you're hooking this upto a graphics engine such as Topaz.
+		HardwareAccelerated
+	};
+	/**
 	 * Specifies creation flags for a window.
 	 */
 	struct WindowInfo
@@ -15,6 +25,8 @@ namespace eld
 		unsigned int height;
 		/// Title of the window. Lifetime needs to be valid until window constructor has completed.
 		const char* title;
+		/// Intent of the rendering done into the window. See @ref WindowRenderingIntent for more info.
+		WindowRenderingIntent intent;
 	};
 
 	/**
