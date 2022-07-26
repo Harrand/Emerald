@@ -102,6 +102,9 @@ namespace eld
 		 * Retrieve the rendering intent used when creating the window. This essentially lets you query as to whether the window supports hardware-accelerated graphics-APIs or software rendering (these are mutually exclusive).
 		 */
 		{t.get_rendering_type()} -> std::same_as<WindowRenderingIntent>;
+		/**
+		 * Attempt to create a new OpenGL context corresponding to the window.
+		 */
 		{t.get_context()} -> ContextType;
 	};
 }
