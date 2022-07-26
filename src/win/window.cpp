@@ -3,6 +3,8 @@
 #include "win/window.hpp"
 #include <utility>
 #include <cassert>
+//temp
+#include <cstdio>
 
 namespace eld
 {
@@ -12,10 +14,15 @@ namespace eld
 		static bool wndclass_registered_hardware = false;
 
 		LRESULT wnd_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
+		WindowWin32* get_window(HWND hwnd)
+		{
+			return reinterpret_cast<WindowWin32*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
+		}
 	}
 
 	WindowWin32::WindowWin32(WindowInfo info):
-	hwnd(nullptr)
+	hwnd(nullptr),
+	render_intent(info.intent)
 	{
 		// Regardless of the number of windows, a wndclass must exist. Let's make sure we only ever have exactly one.
 		constexpr char wnd_class_name_software[] = "Emerald Window Class (Software Rendering)";
@@ -81,7 +88,7 @@ namespace eld
 			nullptr,
 			nullptr,
 			GetModuleHandle(nullptr),
-			nullptr
+			this
 		);
 		assert(this->hwnd != nullptr);
 		ShowWindow(this->hwnd, SW_SHOW);
@@ -89,6 +96,7 @@ namespace eld
 
 	WindowWin32::WindowWin32(WindowWin32&& move):
 	hwnd(move.hwnd),
+	render_intent(move.render_intent),
 	close_requested(move.close_requested),
 	window_text(std::move(move.window_text))
 	{
@@ -99,6 +107,7 @@ namespace eld
 	WindowWin32& WindowWin32::operator==(WindowWin32&& rhs)
 	{
 		std::swap(this->hwnd, rhs.hwnd);
+		std::swap(this->render_intent, rhs.render_intent);
 		std::swap(this->close_requested, rhs.close_requested);
 		std::swap(this->window_text, rhs.window_text);
 		return *this;
@@ -155,6 +164,11 @@ namespace eld
 		return this->close_requested;
 	}
 
+	WindowRenderingIntent WindowWin32::get_rendering_type() const
+	{
+		return this->render_intent;
+	}
+
 	std::pair<int, int> WindowWin32::get_window_size() const
 	{
 		RECT rect;
@@ -174,6 +188,11 @@ namespace eld
 		return msg;
 	}
 
+	HDC WindowWin32::get_hdc()
+	{
+		return GetDC(this->hwnd);
+	}
+
 	namespace win_impl
 	{
 
@@ -181,11 +200,28 @@ namespace eld
 		{
 			switch(msg)
 			{
+				case WM_CREATE:
+				{
+					// Get the WindowWin32 and set it as the userdata for its HWND.
+					CREATESTRUCT* create = reinterpret_cast<CREATESTRUCT*>(lparam);
+					WindowWin32* wnd = reinterpret_cast<WindowWin32*>(create->lpCreateParams);
+					SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)wnd);
+
+				}
+				break;
 				case WM_PAINT:
 				{
 					// Draw with whatever colour is in the user settings.
 					PAINTSTRUCT ps;
 					HDC hdc = BeginPaint(hwnd, &ps);
+
+					WindowWin32* wnd = win_impl::get_window(hwnd);
+					assert(wnd != nullptr && "WindowWin32 userdata not setup properly. userdata was nullptr.");
+					if(wnd->get_rendering_type() == WindowRenderingIntent::SoftwareRendering)
+					{
+						// TODO: Do software rendering.
+					}
+
 					FillRect(hdc, &ps.rcPaint, CreateSolidBrush(RGB(0, 0, 0)));
 					EndPaint(hwnd, &ps);
 					return FALSE;

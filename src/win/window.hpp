@@ -29,10 +29,14 @@ namespace eld
 
 		void update();
 		bool is_close_requested() const;
+		WindowRenderingIntent get_rendering_type() const;
 	private:
 		std::pair<int, int> get_window_size() const;
 		MSG get_message();
+		HDC get_hdc();
+
 		HWND hwnd;
+		WindowRenderingIntent render_intent;
 		bool close_requested = false;
 		mutable std::string window_text = "";
 	};

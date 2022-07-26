@@ -68,6 +68,10 @@ namespace eld
 		 * Query as to whether the window has been requested to close by the user (such as by clicking the 'x' button at the edge of the window).
 		 */
 		{t.is_close_requested()} -> std::same_as<bool>;
+		/**
+		 * Retrieve the rendering intent used when creating the window. This essentially lets you query as to whether the window supports hardware-accelerated graphics-APIs or software rendering (these are mutually exclusive).
+		 */
+		{t.get_rendering_type()} -> std::same_as<WindowRenderingIntent>;
 	};
 }
 
