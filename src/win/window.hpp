@@ -40,6 +40,7 @@ namespace eld
 
 		HWND hwnd;
 		WindowRenderingIntent render_intent;
+		HardwareGraphicsAPI hardware_api;
 		bool close_requested = false;
 		mutable std::string window_text = "";
 	};

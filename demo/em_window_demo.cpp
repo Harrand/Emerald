@@ -12,7 +12,7 @@ int main()
 		.intent = eld::WindowRenderingIntent::HardwareAccelerated,
 		.details = 
 		{
-			.hardware_api = eld::HardwareGraphicsAPI::OpenGL
+			.hardware_api = eld::HardwareGraphicsAPI::Other
 		}
 	}};
 	assert(eld::Context::null().is_current());

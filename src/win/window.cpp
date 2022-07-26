@@ -20,7 +20,8 @@ namespace eld
 
 	WindowWin32::WindowWin32(WindowInfo info):
 	hwnd(nullptr),
-	render_intent(info.intent)
+	render_intent(info.intent),
+	hardware_api(info.details.hardware_api)
 	{
 		// Regardless of the number of windows, a wndclass must exist. Let's make sure we only ever have exactly one.
 		constexpr char wnd_class_name_software[] = "Emerald Window Class (Software Rendering)";
@@ -137,6 +138,7 @@ namespace eld
 	WindowWin32::WindowWin32(WindowWin32&& move):
 	hwnd(move.hwnd),
 	render_intent(move.render_intent),
+	hardware_api(move.hardware_api),
 	close_requested(move.close_requested),
 	window_text(std::move(move.window_text))
 	{
@@ -149,6 +151,7 @@ namespace eld
 	{
 		std::swap(this->hwnd, rhs.hwnd);
 		std::swap(this->render_intent, rhs.render_intent);
+		std::swap(this->hardware_api, rhs.hardware_api);
 		std::swap(this->close_requested, rhs.close_requested);
 		std::swap(this->window_text, rhs.window_text);
 		SetWindowLongPtr(this->hwnd, GWLP_USERDATA, (LONG_PTR)this);
@@ -214,7 +217,7 @@ namespace eld
 
 	ContextWin32 WindowWin32::get_context() const
 	{
-		assert(this->get_rendering_type() == WindowRenderingIntent::HardwareAccelerated && "In order to retrieve a context, the window must support hardware-accelerated rendering.");
+		assert(this->get_rendering_type() == WindowRenderingIntent::HardwareAccelerated && this->hardware_api == HardwareGraphicsAPI::OpenGL && "In order to retrieve an OGL context, the window must support hardware-accelerated rendering and the chosen API must be OpenGL");
 		return {this->get_hdc()};
 	}
 

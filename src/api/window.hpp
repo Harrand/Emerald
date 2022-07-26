@@ -17,11 +17,15 @@ namespace eld
 		HardwareAccelerated
 	};
 
+	/**
+	 * Specifies which hardware-accelerated graphics API you intend to use.
+	 */
 	enum class HardwareGraphicsAPI
 	{
+		/// - OpenGL requires bespoke window system integration before an OpenGL context can be created. For this reason, it is essential you use this value if you intend to use OpenGL to draw into the window.
 		OpenGL,
+		/// - A value representing a graphics-API that is not specified here (e.g vulkan).
 		Other,
-		SoftwareRendering
 	};
 
 	struct WindowRenderingDetails
