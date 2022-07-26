@@ -142,6 +142,7 @@ namespace eld
 	{
 		move.hwnd = nullptr;
 		move.window_text = "";
+		SetWindowLongPtr(this->hwnd, GWLP_USERDATA, (LONG_PTR)this);
 	}
 
 	WindowWin32& WindowWin32::operator==(WindowWin32&& rhs)
@@ -150,6 +151,8 @@ namespace eld
 		std::swap(this->render_intent, rhs.render_intent);
 		std::swap(this->close_requested, rhs.close_requested);
 		std::swap(this->window_text, rhs.window_text);
+		SetWindowLongPtr(this->hwnd, GWLP_USERDATA, (LONG_PTR)this);
+		SetWindowLongPtr(rhs.hwnd, GWLP_USERDATA, (LONG_PTR)&rhs);
 		return *this;
 	}
 

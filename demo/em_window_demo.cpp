@@ -15,8 +15,11 @@ int main()
 			.hardware_api = eld::HardwareGraphicsAPI::OpenGL
 		}
 	}};
+	assert(eld::Context::null().is_current());
+
 	eld::Context ctx = wnd.get_context();
 	assert(!ctx.is_null());
+
 	ctx.make_current();
 	assert(ctx.is_current());
 	assert(!eld::Context::null().is_current());
