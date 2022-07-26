@@ -6,6 +6,9 @@
 
 namespace eld
 {
+	constexpr char wnd_class_name_software[] = "Emerald Window Class (Software Rendering)";
+	constexpr char wnd_class_name_hardware[] = "Emerald Window Class";
+
 	namespace win_impl
 	{
 		static bool wndclass_registered_software = false;
@@ -18,14 +21,15 @@ namespace eld
 		}
 	}
 
+	std::size_t WindowWin32::alive_window_count_hardware = 0;
+	std::size_t WindowWin32::alive_window_count_software = 0;
+
 	WindowWin32::WindowWin32(WindowInfo info):
 	hwnd(nullptr),
 	render_intent(info.intent),
 	hardware_api(info.details.hardware_api)
 	{
 		// Regardless of the number of windows, a wndclass must exist. Let's make sure we only ever have exactly one.
-		constexpr char wnd_class_name_software[] = "Emerald Window Class (Software Rendering)";
-		constexpr char wnd_class_name_hardware[] = "Emerald Window Class";
 		switch(info.intent)
 		{
 			case WindowRenderingIntent::SoftwareRendering:
@@ -90,6 +94,9 @@ namespace eld
 			this
 		);
 		assert(this->hwnd != nullptr);
+		this->on_alive();
+
+		this->hdc = GetDC(this->hwnd);
 		ShowWindow(this->hwnd, SW_SHOW);
 
 		if(info.intent == WindowRenderingIntent::HardwareAccelerated && info.details.hardware_api == HardwareGraphicsAPI::OpenGL)
@@ -137,6 +144,7 @@ namespace eld
 
 	WindowWin32::WindowWin32(WindowWin32&& move):
 	hwnd(move.hwnd),
+	hdc(move.hdc),
 	render_intent(move.render_intent),
 	hardware_api(move.hardware_api),
 	close_requested(move.close_requested),
@@ -147,9 +155,19 @@ namespace eld
 		SetWindowLongPtr(this->hwnd, GWLP_USERDATA, (LONG_PTR)this);
 	}
 
+	WindowWin32::~WindowWin32()
+	{
+		if(this->hwnd != nullptr)
+		{
+			this->on_death();
+			this->hwnd = nullptr;
+		}
+	}
+
 	WindowWin32& WindowWin32::operator==(WindowWin32&& rhs)
 	{
 		std::swap(this->hwnd, rhs.hwnd);
+		std::swap(this->hdc, rhs.hdc);
 		std::swap(this->render_intent, rhs.render_intent);
 		std::swap(this->hardware_api, rhs.hardware_api);
 		std::swap(this->close_requested, rhs.close_requested);
@@ -242,7 +260,51 @@ namespace eld
 
 	HDC WindowWin32::get_hdc() const
 	{
-		return GetDC(this->hwnd);
+		return this->hdc;
+	}
+
+	void WindowWin32::on_alive()
+	{
+		switch(this->get_rendering_type())
+		{
+			case WindowRenderingIntent::SoftwareRendering:
+				WindowWin32::alive_window_count_software++;
+			break;
+			case WindowRenderingIntent::HardwareAccelerated:
+				WindowWin32::alive_window_count_hardware++;
+			break;
+			default:
+				assert(false);
+			break;
+		}
+	}
+
+	void WindowWin32::on_death()
+	{
+		switch(this->get_rendering_type())
+		{
+			case WindowRenderingIntent::SoftwareRendering:
+				assert(WindowWin32::alive_window_count_software > 0);
+				WindowWin32::alive_window_count_software--;
+				if(WindowWin32::alive_window_count_software == 0)
+				{
+					UnregisterClassA(wnd_class_name_software, GetModuleHandle(nullptr));
+					win_impl::wndclass_registered_software = false;
+				}
+			break;
+			case WindowRenderingIntent::HardwareAccelerated:
+				assert(WindowWin32::alive_window_count_hardware > 0);
+				WindowWin32::alive_window_count_hardware--;
+				if(WindowWin32::alive_window_count_hardware == 0)
+				{
+					UnregisterClassA(wnd_class_name_hardware, GetModuleHandle(nullptr));
+					win_impl::wndclass_registered_hardware = false;
+				}
+			break;
+			default:
+				assert(false);
+			break;
+		}
 	}
 
 	namespace win_impl
