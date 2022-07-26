@@ -90,6 +90,48 @@ namespace eld
 		);
 		assert(this->hwnd != nullptr);
 		ShowWindow(this->hwnd, SW_SHOW);
+
+		if(info.intent == WindowRenderingIntent::HardwareAccelerated && info.details.hardware_api == HardwareGraphicsAPI::OpenGL)
+		{
+			// If we're gonna use OpenGL, there is some setup to do first.
+			// OpenGL moment.
+			PIXELFORMATDESCRIPTOR pfd
+			{
+				.nSize = sizeof(PIXELFORMATDESCRIPTOR),
+				.nVersion = 1,
+				.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL,
+				.iPixelType = PFD_TYPE_RGBA,
+				.cColorBits = info.details.ogl_details.colour_buffer_depth,
+				.cRedBits = 0,
+				.cRedShift = 0,
+				.cGreenBits = 0,
+				.cGreenShift = 0,
+				.cBlueBits = 0,
+				.cBlueShift = 0,
+				.cAlphaBits = 0,
+				.cAlphaShift = 0,
+				.cAccumBits = 0,
+				.cAccumRedBits = 0,
+				.cAccumGreenBits = 0,
+				.cAccumBlueBits = 0,
+				.cAccumAlphaBits = 0,
+				.cDepthBits = info.details.ogl_details.depth_buffer_size_bits,
+				.cStencilBits = info.details.ogl_details.stencil_buffer_size_bits,
+				.cAuxBuffers = 0,
+				.iLayerType = PFD_MAIN_PLANE,
+				.bReserved = 0,
+				.dwLayerMask = 0,
+				.dwVisibleMask = 0,
+				.dwDamageMask = 0
+			};
+			if(info.details.ogl_details.double_buffer)
+			{
+				pfd.dwFlags |= PFD_DOUBLEBUFFER;
+			}
+			int pfn = ChoosePixelFormat(this->get_hdc(), &pfd);
+			assert(pfn != 0);
+			SetPixelFormat(this->get_hdc(), pfn, &pfd);
+		}
 	}
 
 	WindowWin32::WindowWin32(WindowWin32&& move):

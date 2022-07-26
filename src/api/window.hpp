@@ -1,6 +1,7 @@
 #ifndef EMERALD_SRC_API_WINDOW_HPP
 #define EMERALD_SRC_API_WINDOW_HPP
 #include <concepts>
+#include <cstdint>
 #include "api/context.hpp"
 
 namespace eld
@@ -15,6 +16,28 @@ namespace eld
 		/// - Window surface will be renderered into through a hardware-accelerated graphics API, such as Vulkan or OpenGL. Use this if you're hooking this upto a graphics engine such as Topaz.
 		HardwareAccelerated
 	};
+
+	enum class HardwareGraphicsAPI
+	{
+		OpenGL,
+		Other,
+		SoftwareRendering
+	};
+
+	struct WindowRenderingDetails
+	{
+		struct OpenGLDetails
+		{
+			bool double_buffer = true;
+			std::uint8_t colour_buffer_depth = 32;
+			std::uint8_t depth_buffer_size_bits = 24;
+			std::uint8_t stencil_buffer_size_bits = 8;
+		};
+		/// Represents which graphics API is intended to be used for a hardware-accelerated window. If the window's rendering intent is SoftwareRendering, this is ignored.
+		HardwareGraphicsAPI hardware_api = HardwareGraphicsAPI::Other;
+		/// Specifies specific values used when setting up the OpenGL context. If `hardware_api != HardwareGraphicsAPI::OpenGL` or the window is software rendering, this is ignored.
+		OpenGLDetails ogl_details = OpenGLDetails{};
+	};
 	/**
 	 * Specifies creation flags for a window.
 	 */
@@ -28,6 +51,8 @@ namespace eld
 		const char* title;
 		/// Intent of the rendering done into the window. See @ref WindowRenderingIntent for more info.
 		WindowRenderingIntent intent;
+		/// Describes in more detail what type of rendering is expected to be done for the window. Failing to set the details properly will lead to serious runtime hazards.
+		WindowRenderingDetails details = {};
 	};
 
 	/**

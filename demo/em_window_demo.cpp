@@ -9,7 +9,11 @@ int main()
 		.width = 800,
 		.height = 600,
 		.title = "Emerald Window Demo",
-		.intent = eld::WindowRenderingIntent::HardwareAccelerated
+		.intent = eld::WindowRenderingIntent::HardwareAccelerated,
+		.details = 
+		{
+			.hardware_api = eld::HardwareGraphicsAPI::OpenGL
+		}
 	}};
 	eld::Context ctx = wnd.get_context();
 	assert(!ctx.is_null());
