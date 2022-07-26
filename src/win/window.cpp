@@ -3,8 +3,6 @@
 #include "win/window.hpp"
 #include <utility>
 #include <cassert>
-//temp
-#include <cstdio>
 
 namespace eld
 {
