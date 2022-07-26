@@ -95,9 +95,13 @@ namespace eld
 		 */
 		{t.update()} -> std::same_as<void>;
 		/**
-		 * Query as to whether the window has been requested to close by the user (such as by clicking the 'x' button at the edge of the window).
+		 * Query as to whether the window has been requested to close by the user (such as by clicking the 'x' button at the edge of the window, or via `request_close`).
 		 */
 		{t.is_close_requested()} -> std::same_as<bool>;
+		/**
+		 * Request the window to close. This is guaranteed to succeed, but will not happen instantly. It may take a few update cycles to actually close.
+		 */
+		{t.request_close()} -> std::same_as<void>;
 		/**
 		 * Retrieve the rendering intent used when creating the window. This essentially lets you query as to whether the window supports hardware-accelerated graphics-APIs or software rendering (these are mutually exclusive).
 		 */

@@ -32,6 +32,7 @@ namespace eld
 
 		void update();
 		bool is_close_requested() const;
+		void request_close();
 		WindowRenderingIntent get_rendering_type() const;
 		ContextWin32 get_context() const;
 

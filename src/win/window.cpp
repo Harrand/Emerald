@@ -228,6 +228,12 @@ namespace eld
 		return this->close_requested;
 	}
 
+	void WindowWin32::request_close()
+	{
+		ReleaseDC(this->hwnd, this->hdc);
+		DestroyWindow(this->hwnd);
+	}
+
 	WindowRenderingIntent WindowWin32::get_rendering_type() const
 	{
 		return this->render_intent;
@@ -312,6 +318,13 @@ namespace eld
 
 		LRESULT wnd_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 		{
+			auto get_window = [hwnd]()
+			{
+				WindowWin32* wnd = win_impl::get_window(hwnd);
+				assert(wnd != nullptr && "WindowWin32 userdata not setup properly. userdata was nullptr.");
+				return wnd;
+			};
+
 			switch(msg)
 			{
 				case WM_CREATE:
@@ -329,9 +342,7 @@ namespace eld
 					PAINTSTRUCT ps;
 					HDC hdc = BeginPaint(hwnd, &ps);
 
-					WindowWin32* wnd = win_impl::get_window(hwnd);
-					assert(wnd != nullptr && "WindowWin32 userdata not setup properly. userdata was nullptr.");
-					if(wnd->get_rendering_type() == WindowRenderingIntent::SoftwareRendering)
+					if(get_window()->get_rendering_type() == WindowRenderingIntent::SoftwareRendering)
 					{
 						// TODO: Do software rendering.
 					}
@@ -342,7 +353,7 @@ namespace eld
 				}
 				break;
 				case WM_CLOSE:
-					DestroyWindow(hwnd);
+					get_window()->request_close();
 					return FALSE;
 				break;
 				case WM_DESTROY:
