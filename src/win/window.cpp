@@ -1,4 +1,5 @@
 #if ELD_WIN
+#define OEMRESOURCE
 #include "win/window.hpp"
 #include <utility>
 #include <cassert>
@@ -105,15 +106,26 @@ namespace eld
 					HDC hdc = BeginPaint(hwnd, &ps);
 					FillRect(hdc, &ps.rcPaint, CreateSolidBrush(RGB(0, 0, 0)));
 					EndPaint(hwnd, &ps);
-					return 0;
+					return FALSE;
 				}
 				break;
 				case WM_CLOSE:
 					DestroyWindow(hwnd);
-					return 0;
+					return FALSE;
 				break;
 				case WM_DESTROY:
 					PostQuitMessage(0);
+					return FALSE;
+				break;
+				case WM_SETCURSOR:
+				{
+					if(LOWORD(lparam) == HTCLIENT)
+					{
+						HANDLE cursor = LoadImage(nullptr, MAKEINTRESOURCE(OCR_NORMAL), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE | LR_SHARED);
+						SetCursor((HCURSOR)cursor);
+						return TRUE;
+					}
+				}
 				break;
 			}
 			return DefWindowProc(hwnd, msg, wparam, lparam);
