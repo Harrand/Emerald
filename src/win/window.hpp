@@ -2,6 +2,7 @@
 #define EMERALD_SRC_WIN_WINDOW_HPP
 #if ELD_WIN
 #include "api/window.hpp"
+#include "win/context.hpp"
 
 #include <windows.h>
 
@@ -30,10 +31,12 @@ namespace eld
 		void update();
 		bool is_close_requested() const;
 		WindowRenderingIntent get_rendering_type() const;
+		ContextWin32 get_context() const;
+
 	private:
 		std::pair<int, int> get_window_size() const;
 		MSG get_message();
-		HDC get_hdc();
+		HDC get_hdc() const;
 
 		HWND hwnd;
 		WindowRenderingIntent render_intent;

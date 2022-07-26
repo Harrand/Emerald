@@ -167,6 +167,12 @@ namespace eld
 		return this->render_intent;
 	}
 
+	ContextWin32 WindowWin32::get_context() const
+	{
+		assert(this->get_rendering_type() == WindowRenderingIntent::HardwareAccelerated && "In order to retrieve a context, the window must support hardware-accelerated rendering.");
+		return {this->get_hdc()};
+	}
+
 	std::pair<int, int> WindowWin32::get_window_size() const
 	{
 		RECT rect;
@@ -186,7 +192,7 @@ namespace eld
 		return msg;
 	}
 
-	HDC WindowWin32::get_hdc()
+	HDC WindowWin32::get_hdc() const
 	{
 		return GetDC(this->hwnd);
 	}

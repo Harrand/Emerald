@@ -37,7 +37,7 @@ def configure():
         sys.exit('Failed to configure Emerald CMake project -- Operating system %s is not recognised as a valid build platform.' % os_name)
 
     build_dir = os_name + "_" + build_config_str
-    cmd = "cmake -B \"build/%s\" -G \"%s\" -S ." % (build_dir, build_type.generator)
+    cmd = "cmake -B \"build/%s\" -DEMERALD_BUILDCONFIG=%s -G \"%s\" -S ." % (build_dir, build_config_str, build_type.generator)
     print('Configuring Emerald build system generation with default settings...')
     subprocess.call(cmd)
 

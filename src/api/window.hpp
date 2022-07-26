@@ -1,6 +1,7 @@
 #ifndef EMERALD_SRC_API_WINDOW_HPP
 #define EMERALD_SRC_API_WINDOW_HPP
 #include <concepts>
+#include "api/context.hpp"
 
 namespace eld
 {
@@ -72,6 +73,7 @@ namespace eld
 		 * Retrieve the rendering intent used when creating the window. This essentially lets you query as to whether the window supports hardware-accelerated graphics-APIs or software rendering (these are mutually exclusive).
 		 */
 		{t.get_rendering_type()} -> std::same_as<WindowRenderingIntent>;
+		{t.get_context()} -> ContextType;
 	};
 }
 
