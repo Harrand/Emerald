@@ -8,7 +8,8 @@ namespace eld
 {
 	namespace win_impl
 	{
-		static bool wndclass_registered = false;
+		static bool wndclass_registered_software = false;
+		static bool wndclass_registered_hardware = false;
 
 		LRESULT wnd_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 	}
@@ -16,34 +17,64 @@ namespace eld
 	WindowWin32::WindowWin32(WindowInfo info):
 	hwnd(nullptr)
 	{
-		assert(info.intent == WindowRenderingIntent::SoftwareRendering && "Only SoftwareRendering is supported on windows right now im afraid.");
 		// Regardless of the number of windows, a wndclass must exist. Let's make sure we only ever have exactly one.
-		constexpr char wnd_class_name[] = "Emerald Window Class";
-		if(!win_impl::wndclass_registered)
+		constexpr char wnd_class_name_software[] = "Emerald Window Class (Software Rendering)";
+		constexpr char wnd_class_name_hardware[] = "Emerald Window Class";
+		switch(info.intent)
 		{
-			WNDCLASSEX wc
-			{
-				.cbSize = sizeof(WNDCLASSEX),
-				.style = 0,
-				.lpfnWndProc = win_impl::wnd_proc,
-				.cbClsExtra = 0,
-				.cbWndExtra = 0,
-				.hInstance = GetModuleHandle(nullptr),
-				.hIcon = nullptr,
-				.hCursor = nullptr,
-				.hbrBackground = nullptr,
-				.lpszMenuName = nullptr,
-				.lpszClassName = wnd_class_name,
-				.hIconSm = nullptr
-			};
-			RegisterClassEx(&wc);
-			win_impl::wndclass_registered = true;
+			case WindowRenderingIntent::SoftwareRendering:
+				if(!win_impl::wndclass_registered_software)
+				{
+					WNDCLASSEXA wc
+					{
+						.cbSize = sizeof(WNDCLASSEXA),
+						.style = 0,
+						.lpfnWndProc = win_impl::wnd_proc,
+						.cbClsExtra = 0,
+						.cbWndExtra = 0,
+						.hInstance = GetModuleHandle(nullptr),
+						.hIcon = nullptr,
+						.hCursor = nullptr,
+						.hbrBackground = nullptr,
+						.lpszMenuName = nullptr,
+						.lpszClassName = wnd_class_name_software,
+						.hIconSm = nullptr
+					};
+					RegisterClassExA(&wc);
+					win_impl::wndclass_registered_software = true;
+				}
+			break;
+			case WindowRenderingIntent::HardwareAccelerated:
+				if(!win_impl::wndclass_registered_hardware)
+				{
+					WNDCLASSEXA wc
+					{
+						.cbSize = sizeof(WNDCLASSEXA),
+						.style = CS_OWNDC,
+						.lpfnWndProc = win_impl::wnd_proc,
+						.cbClsExtra = 0,
+						.cbWndExtra = 0,
+						.hInstance = GetModuleHandle(nullptr),
+						.hIcon = nullptr,
+						.hCursor = nullptr,
+						.hbrBackground = nullptr,
+						.lpszMenuName = nullptr,
+						.lpszClassName = wnd_class_name_hardware,
+						.hIconSm = nullptr
+					};
+					RegisterClassExA(&wc);
+					win_impl::wndclass_registered_hardware = true;
+				}
+			break;
+			default:
+				assert(false && "Unrecognised WindowRenderingIntent");
+			break;
 		}
 
 		// Actually create the window now.
 		this->hwnd = CreateWindowExA(
 			0,
-			wnd_class_name,
+			(info.intent == WindowRenderingIntent::SoftwareRendering) ? wnd_class_name_software : wnd_class_name_hardware,
 			info.title,
 			WS_OVERLAPPEDWINDOW,
 			CW_USEDEFAULT, CW_USEDEFAULT, static_cast<int>(info.width), static_cast<int>(info.height),
@@ -58,15 +89,18 @@ namespace eld
 
 	WindowWin32::WindowWin32(WindowWin32&& move):
 	hwnd(move.hwnd),
-	close_requested(move.close_requested)
+	close_requested(move.close_requested),
+	window_text(std::move(move.window_text))
 	{
 		move.hwnd = nullptr;
+		move.window_text = "";
 	}
 
 	WindowWin32& WindowWin32::operator==(WindowWin32&& rhs)
 	{
 		std::swap(this->hwnd, rhs.hwnd);
 		std::swap(this->close_requested, rhs.close_requested);
+		std::swap(this->window_text, rhs.window_text);
 		return *this;
 	}
 
