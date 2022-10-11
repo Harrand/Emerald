@@ -15,7 +15,7 @@ endfunction()
 function(configure_win32 target)
 	message(WARNING "Detected Windows operating system. Support for this platform is incomplete.")
 	target_compile_definitions(${target} PUBLIC -DELD_LINUX=0 -DELD_WIN=1)
-	target_link_libraries(${target} PUBLIC OpenGL32)
+	target_link_libraries(${target} PUBLIC OpenGL32 gdiplus)
 endfunction()
 
 function(configure_linux target)

@@ -3,6 +3,7 @@
 #include "win/window.hpp"
 #include <utility>
 #include <cassert>
+#include <gdiplus.h>
 
 namespace eld
 {
@@ -13,6 +14,14 @@ namespace eld
 	{
 		static bool wndclass_registered_software = false;
 		static bool wndclass_registered_hardware = false;
+		struct SoftwareRenderingInfo
+		{
+			Gdiplus::GdiplusStartupInput input = {};
+			ULONG_PTR gdip_token = {};
+			bool initialised = false;
+		};
+
+		static SoftwareRenderingInfo sw_info = {};
 
 		LRESULT wnd_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 		WindowWin32* get_window(HWND hwnd)
@@ -52,6 +61,14 @@ namespace eld
 					};
 					RegisterClassExA(&wc);
 					win_impl::wndclass_registered_software = true;
+				}
+				{
+					auto& sw_impl = win_impl::sw_info;
+					if(!sw_impl.initialised)
+					{
+						Gdiplus::GdiplusStartup(&sw_impl.gdip_token, &sw_impl.input, nullptr);
+						sw_impl.initialised = true;
+					}
 				}
 			break;
 			case WindowRenderingIntent::HardwareAccelerated:
@@ -245,6 +262,11 @@ namespace eld
 		return {this->get_hdc()};
 	}
 
+	DrawCommandList& WindowWin32::impl_command_list()
+	{
+		return this->software_draws;
+	}
+
 	std::pair<int, int> WindowWin32::get_window_size() const
 	{
 		RECT rect;
@@ -296,6 +318,8 @@ namespace eld
 				{
 					UnregisterClassA(wnd_class_name_software, GetModuleHandle(nullptr));
 					win_impl::wndclass_registered_software = false;
+					Gdiplus::GdiplusShutdown(win_impl::sw_info.gdip_token);
+					win_impl::sw_info.initialised = false;
 				}
 			break;
 			case WindowRenderingIntent::HardwareAccelerated:
@@ -341,13 +365,35 @@ namespace eld
 					// Draw with whatever colour is in the user settings.
 					PAINTSTRUCT ps;
 					HDC hdc = BeginPaint(hwnd, &ps);
+					FillRect(hdc, &ps.rcPaint, CreateSolidBrush(RGB(0, 0, 0)));
 
 					if(get_window()->get_rendering_type() == WindowRenderingIntent::SoftwareRendering)
 					{
+						Gdiplus::Graphics graphics(hdc);
 						// TODO: Do software rendering.
+						for(const DrawCommandVariant& cmd : get_window()->impl_command_list().span())
+						{
+							std::visit([&graphics](auto&& arg)
+							{
+								using T = std::decay_t<decltype(arg)>;
+								if constexpr(std::is_same_v<T, DrawCommand<DrawPrimitive::Line>>)
+								{
+									Gdiplus::Pen pen(Gdiplus::Color::MakeARGB(255, 255, 0, 0), arg.width);
+									Gdiplus::Point points[2];
+									points[0] = {arg.begin.x, arg.begin.y};
+									points[1] = {arg.end.x, arg.end.y};
+									graphics.DrawLines(&pen, points, 2);
+
+									std::printf("drawing a line!");
+								}
+								else
+								{
+									std::printf("I DONT KNOW WHAT IM DRAWING AAA");
+								}
+							}, cmd);
+						}
 					}
 
-					FillRect(hdc, &ps.rcPaint, CreateSolidBrush(RGB(0, 0, 0)));
 					EndPaint(hwnd, &ps);
 					return FALSE;
 				}

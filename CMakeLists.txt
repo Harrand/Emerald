@@ -6,12 +6,20 @@ include(cmake/setup.cmake)
 
 add_library(emerald STATIC
 	src/api/context.hpp
+	src/api/draw.hpp
+	src/api/software_renderer.hpp
 	src/api/window.hpp
+	src/common/draw.hpp
 	src/win/context.cpp
 	src/win/context.hpp
+	src/win/software_renderer.hpp
+	src/win/software_renderer.cpp
 	src/win/window.cpp
 	src/win/window.hpp
 	src/context.hpp
+	src/draw.cpp
+	src/draw.hpp
+	src/software_renderer.hpp
 	src/window.hpp
 	)
 set_target_properties(emerald PROPERTIES

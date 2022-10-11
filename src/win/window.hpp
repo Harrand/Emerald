@@ -3,6 +3,7 @@
 #if ELD_WIN
 #include "api/window.hpp"
 #include "win/context.hpp"
+#include "common/draw.hpp"
 
 #include <windows.h>
 
@@ -36,6 +37,7 @@ namespace eld
 		WindowRenderingIntent get_rendering_type() const;
 		ContextWin32 get_context() const;
 
+		DrawCommandList& impl_command_list();
 	private:
 		std::pair<int, int> get_window_size() const;
 		MSG get_message();
@@ -49,6 +51,7 @@ namespace eld
 		HardwareGraphicsAPI hardware_api;
 		bool close_requested = false;
 		mutable std::string window_text = "";
+		DrawCommandList software_draws = {};
 	};
 
 	static_assert(WindowType<WindowWin32>);
