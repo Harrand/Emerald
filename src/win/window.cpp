@@ -392,6 +392,8 @@ namespace eld
 								}
 							}, cmd);
 						}
+
+						get_window()->impl_command_list() = {};
 					}
 
 					EndPaint(hwnd, &ps);
