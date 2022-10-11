@@ -1,7 +1,5 @@
-#include "api/software_renderer.hpp"
 #include "window.hpp"
 #include "context.hpp"
-#include "software_renderer.hpp"
 #include <cassert>
 
 int main()
@@ -11,19 +9,24 @@ int main()
 		.width = 800,
 		.height = 600,
 		.title = "Emerald Window Demo",
-		.intent = eld::WindowRenderingIntent::SoftwareRendering,
+		.intent = eld::WindowRenderingIntent::HardwareAccelerated,
+		.details =
+		{
+			.hardware_api = eld::HardwareGraphicsAPI::OpenGL
+		}
 	}};
 
-	eld::SoftwareRenderer renderer;
-	renderer.get_command_list().add<eld::DrawPrimitive::Line>
-	({
-		.begin = {0, 0},
-		.end = {1000, 150},
-	});
+	assert(eld::Context::null().is_current());
+
+	eld::Context ctx = wnd.get_context();
+	assert(!ctx.is_null());
+
+	ctx.make_current();
+	assert(ctx.is_current());
+	assert(!eld::Context::null().is_current());
 
 	while(!wnd.is_close_requested())
 	{
-		renderer.render(wnd);
 		wnd.update();
 	}
 }

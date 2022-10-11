@@ -373,22 +373,22 @@ namespace eld
 						// TODO: Do software rendering.
 						for(const DrawCommandVariant& cmd : get_window()->impl_command_list().span())
 						{
-							std::visit([&graphics](auto&& arg)
+							std::visit([&graphics, &get_window](auto&& arg)
 							{
 								using T = std::decay_t<decltype(arg)>;
 								if constexpr(std::is_same_v<T, DrawCommand<DrawPrimitive::Line>>)
 								{
 									Gdiplus::Pen pen(Gdiplus::Color::MakeARGB(255, 255, 0, 0), arg.width);
 									Gdiplus::Point points[2];
-									points[0] = {arg.begin.x, arg.begin.y};
-									points[1] = {arg.end.x, arg.end.y};
+									int h = static_cast<int>(get_window()->get_height());
+									points[0] = {arg.begin.x, h - arg.begin.y};
+									points[1] = {arg.end.x, h - arg.end.y};
 									graphics.DrawLines(&pen, points, 2);
 
-									std::printf("drawing a line!");
 								}
 								else
 								{
-									std::printf("I DONT KNOW WHAT IM DRAWING AAA");
+									assert(false && "DrawCommand encountered with a primitive type that is not supported. Please submit a bug report.");
 								}
 							}, cmd);
 						}
