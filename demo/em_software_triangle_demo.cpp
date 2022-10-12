@@ -1,6 +1,6 @@
-#include "window.hpp"
-#include "context.hpp"
-#include "software_renderer.hpp"
+#include "eld/window.hpp"
+#include "eld/context.hpp"
+#include "eld/software_renderer.hpp"
 
 int main()
 {

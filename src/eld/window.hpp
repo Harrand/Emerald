@@ -2,7 +2,7 @@
 #define EMERALD_SRC_WINDOW_HPP
 
 #if ELD_WIN
-#include "win/window.hpp"
+#include "eld/win/window.hpp"
 #elif ELD_LINUX
 
 #else

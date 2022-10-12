@@ -1,6 +1,6 @@
 #if ELD_WIN
 #define OEMRESOURCE
-#include "win/window.hpp"
+#include "eld/win/window.hpp"
 #include <cstddef>
 #include <cstring>
 #include <utility>

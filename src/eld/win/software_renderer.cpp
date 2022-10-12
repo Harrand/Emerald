@@ -1,6 +1,6 @@
 #if ELD_WIN
-#include "api/window.hpp"
-#include "win/software_renderer.hpp"
+#include "eld/api/window.hpp"
+#include "eld/win/software_renderer.hpp"
 #include <cstdio>
 #include <cassert>
 

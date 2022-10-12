@@ -5,22 +5,22 @@ project(emerald VERSION 1.0
 include(cmake/setup.cmake)
 
 add_library(emerald STATIC
-	src/api/context.hpp
-	src/api/draw.hpp
-	src/api/software_renderer.hpp
-	src/api/window.hpp
-	src/common/draw.hpp
-	src/win/context.cpp
-	src/win/context.hpp
-	src/win/software_renderer.hpp
-	src/win/software_renderer.cpp
-	src/win/window.cpp
-	src/win/window.hpp
-	src/context.hpp
-	src/draw.cpp
-	src/draw.hpp
-	src/software_renderer.hpp
-	src/window.hpp
+	src/eld/api/context.hpp
+	src/eld/api/draw.hpp
+	src/eld/api/software_renderer.hpp
+	src/eld/api/window.hpp
+	src/eld/common/draw.hpp
+	src/eld/win/context.cpp
+	src/eld/win/context.hpp
+	src/eld/win/software_renderer.hpp
+	src/eld/win/software_renderer.cpp
+	src/eld/win/window.cpp
+	src/eld/win/window.hpp
+	src/eld/context.hpp
+	src/eld/draw.cpp
+	src/eld/draw.hpp
+	src/eld/software_renderer.hpp
+	src/eld/window.hpp
 	)
 set_target_properties(emerald PROPERTIES
 	CXX_STANDARD 20

@@ -2,7 +2,7 @@
 #define EMERALD_SRC_SOFTWARE_RENDERER_HPP
 
 #if ELD_WIN
-#include "win/software_renderer.hpp"
+#include "eld/win/software_renderer.hpp"
 #elif ELD_LINUX
 
 #else

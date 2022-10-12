@@ -1,9 +1,9 @@
 #ifndef EMERALD_SRC_WIN_WINDOW_HPP
 #define EMERALD_SRC_WIN_WINDOW_HPP
 #if ELD_WIN
-#include "api/window.hpp"
-#include "win/context.hpp"
-#include "common/draw.hpp"
+#include "eld/api/window.hpp"
+#include "eld/win/context.hpp"
+#include "eld/common/draw.hpp"
 
 #include <windows.h>
 
