@@ -9,7 +9,6 @@ add_library(emerald STATIC
 	src/eld/api/draw.hpp
 	src/eld/api/software_renderer.hpp
 	src/eld/api/window.hpp
-	src/eld/common/draw.hpp
 	src/eld/win/context.cpp
 	src/eld/win/context.hpp
 	src/eld/win/software_renderer.hpp

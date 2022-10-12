@@ -2,6 +2,8 @@
 #define EMERALD_SRC_API_DRAW_HPP
 #include <concepts>
 #include <variant>
+#include <vector>
+#include <span>
 
 namespace eld
 {
@@ -41,6 +43,22 @@ namespace eld
 	};
 
 	using DrawCommandVariant = std::variant<DrawCommand<DrawPrimitive::Line>, DrawCommand<DrawPrimitive::Text>, DrawCommand<DrawPrimitive::Polygon>>;
+
+	class DrawCommandList
+	{
+	public:
+		template<DrawPrimitive P>
+		void add(const DrawCommand<P>& cmd)
+		{
+			this->commands.push_back({cmd});
+		}
+
+		std::span<const DrawCommandVariant> span() const {return this->commands;}
+		std::span<DrawCommandVariant> span() {return this->commands;}
+
+	private:
+		std::vector<DrawCommandVariant> commands;
+	};
 }
 
 #endif // EMERALD_SRC_API_DRAW_HPP
