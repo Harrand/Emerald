@@ -7,17 +7,15 @@ include(cmake/setup.cmake)
 add_library(emerald STATIC
 	src/eld/api/context.hpp
 	src/eld/api/draw.hpp
-	src/eld/api/software_renderer.hpp
 	src/eld/api/window.hpp
 	src/eld/win/context.cpp
 	src/eld/win/context.hpp
-	src/eld/win/software_renderer.hpp
-	src/eld/win/software_renderer.cpp
 	src/eld/win/window.cpp
 	src/eld/win/window.hpp
 	src/eld/context.hpp
 	src/eld/draw.cpp
 	src/eld/draw.hpp
+	src/eld/software_renderer.cpp
 	src/eld/software_renderer.hpp
 	src/eld/window.hpp
 	)
