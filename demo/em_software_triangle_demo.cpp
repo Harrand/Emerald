@@ -13,22 +13,14 @@ int main()
 	}};
 
 	eld::SoftwareRenderer renderer;
-	renderer.get_command_list().add<eld::DrawPrimitive::Line>
+	renderer.get_command_list().add<eld::DrawPrimitive::Polygon>
 	({
-		.begin = {200, 200},
-		.end = {300, 400},
-		.width = 3.0f
-	});
-	renderer.get_command_list().add<eld::DrawPrimitive::Line>
-	({
-		.begin = {300, 400},
-		.end = {400, 200},
-		.width = 3.0f,
-	});
-	renderer.get_command_list().add<eld::DrawPrimitive::Line>
-	({
-		.begin = {400, 200},
-		.end = {200, 200},
+		.positions =
+		{
+			{200, 200},
+			{300, 400},
+			{400, 200}, 
+		},
 		.width = 3.0f
 	});
 	renderer.get_command_list().add<eld::DrawPrimitive::Text>

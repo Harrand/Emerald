@@ -14,9 +14,9 @@ namespace eld
 
 	enum class DrawPrimitive
 	{
-		Polygon,
 		Line,
-		Text
+		Text,
+		Polygon,
 	};
 
 	template<DrawPrimitive D>
@@ -39,6 +39,14 @@ namespace eld
 		const char* data;
 		unsigned int text_size = 16;
 		/// ARGB
+		unsigned int colour = 0xffffffff;
+	};
+
+	template<>
+	struct DrawCommand<DrawPrimitive::Polygon>
+	{
+		std::vector<Point> positions;
+		float width = 1.0f;
 		unsigned int colour = 0xffffffff;
 	};
 

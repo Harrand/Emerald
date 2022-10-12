@@ -5,6 +5,7 @@
 #include <cstring>
 #include <utility>
 #include <cassert>
+#include <algorithm>
 #include <gdiplus.h>
 
 namespace eld
@@ -383,7 +384,7 @@ namespace eld
 									auto line_colour = Gdiplus::Color::MakeARGB(arg.colour >> 8*3, arg.colour >> 8*2, arg.colour >> 8*1, arg.colour >> 8*0);
 									Gdiplus::Pen pen(line_colour, arg.width);
 									Gdiplus::Point points[2];
-									int h = static_cast<int>(get_window()->get_height());
+									const int h = static_cast<int>(get_window()->get_height());
 									points[0] = {arg.begin.x, h - arg.begin.y};
 									points[1] = {arg.end.x, h - arg.end.y};
 									graphics.DrawLines(&pen, points, 2);
@@ -405,6 +406,16 @@ namespace eld
 									MultiByteToWideChar(CP_ACP, 0, arg.data, -1, wstr.data(), len);
 									graphics.DrawString(wstr.data(), len, &font, point, &brush);
 
+								}
+								else if constexpr(std::is_same_v<T, DrawCommand<DrawPrimitive::Polygon>>)
+								{
+									auto polygon_colour = Gdiplus::Color::MakeARGB(arg.colour >> 8*3, arg.colour >> 8*2, arg.colour >> 8*1, arg.colour >> 8*0);
+									const int h = static_cast<int>(get_window()->get_height());
+									Gdiplus::Pen pen(polygon_colour, arg.width);
+									std::vector<Gdiplus::PointF> points;
+									points.resize(arg.positions.size());
+									std::transform(arg.positions.begin(), arg.positions.end(), points.begin(), [&h](const Point& p){Gdiplus::PointF f; f.X = p.x; f.Y = h - p.y; return f;});
+									graphics.DrawPolygon(&pen, points.data(), points.size());
 								}
 								else
 								{
