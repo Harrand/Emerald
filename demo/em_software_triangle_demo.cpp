@@ -23,13 +23,19 @@ int main()
 	({
 		.begin = {300, 400},
 		.end = {400, 200},
-		.width = 3.0f
+		.width = 3.0f,
 	});
 	renderer.get_command_list().add<eld::DrawPrimitive::Line>
 	({
 		.begin = {400, 200},
 		.end = {200, 200},
 		.width = 3.0f
+	});
+	renderer.get_command_list().add<eld::DrawPrimitive::Text>
+	({
+		.location = {420, 300},
+		.data = "hello, world",
+		.text_size = 64
 	});
 
 	while(!wnd.is_close_requested())

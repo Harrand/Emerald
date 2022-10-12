@@ -1,6 +1,8 @@
 #if ELD_WIN
 #define OEMRESOURCE
 #include "win/window.hpp"
+#include <cstddef>
+#include <cstring>
 #include <utility>
 #include <cassert>
 #include <gdiplus.h>
@@ -378,12 +380,30 @@ namespace eld
 								using T = std::decay_t<decltype(arg)>;
 								if constexpr(std::is_same_v<T, DrawCommand<DrawPrimitive::Line>>)
 								{
-									Gdiplus::Pen pen(Gdiplus::Color::MakeARGB(255, 255, 0, 0), arg.width);
+									auto line_colour = Gdiplus::Color::MakeARGB(arg.colour >> 8*3, arg.colour >> 8*2, arg.colour >> 8*1, arg.colour >> 8*0);
+									Gdiplus::Pen pen(line_colour, arg.width);
 									Gdiplus::Point points[2];
 									int h = static_cast<int>(get_window()->get_height());
 									points[0] = {arg.begin.x, h - arg.begin.y};
 									points[1] = {arg.end.x, h - arg.end.y};
 									graphics.DrawLines(&pen, points, 2);
+
+								}
+								else if constexpr(std::is_same_v<T, DrawCommand<DrawPrimitive::Text>>)
+								{
+									auto text_colour = Gdiplus::Color::MakeARGB(arg.colour >> 8*3, arg.colour >> 8*2, arg.colour >> 8*1, arg.colour >> 8*0);
+									auto brush = Gdiplus::SolidBrush(text_colour);
+									Gdiplus::FontFamily family(L"Arial");
+									Gdiplus::Font font(&family, arg.text_size, Gdiplus::FontStyleRegular, Gdiplus::UnitPixel);
+									Gdiplus::PointF point;
+									point.X = static_cast<float>(arg.location.x);
+									point.Y = static_cast<float>(arg.location.y);
+									std::size_t len = std::strlen(arg.data);
+									std::wstring wstr;
+									wstr.resize(len);
+									std::size_t wide_len = len * sizeof(wchar_t);
+									MultiByteToWideChar(CP_ACP, 0, arg.data, -1, wstr.data(), len);
+									graphics.DrawString(wstr.data(), len, &font, point, &brush);
 
 								}
 								else
