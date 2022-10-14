@@ -50,7 +50,7 @@ namespace eld
 					WNDCLASSEXA wc
 					{
 						.cbSize = sizeof(WNDCLASSEXA),
-						.style = 0,
+						.style = CS_HREDRAW | CS_VREDRAW,
 						.lpfnWndProc = win_impl::wnd_proc,
 						.cbClsExtra = 0,
 						.cbWndExtra = 0,
@@ -265,6 +265,11 @@ namespace eld
 		return {this->get_hdc()};
 	}
 
+	WindowWin32::NativeType WindowWin32::native() const
+	{
+		return this->hwnd;
+	}
+
 	DrawCommandList& WindowWin32::impl_command_list()
 	{
 		return this->software_draws;
@@ -423,8 +428,6 @@ namespace eld
 								}
 							}, cmd);
 						}
-
-						get_window()->impl_command_list() = {};
 					}
 
 					EndPaint(hwnd, &ps);
