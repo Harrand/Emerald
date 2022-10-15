@@ -399,11 +399,12 @@ namespace eld
 								{
 									auto text_colour = Gdiplus::Color::MakeARGB(arg.colour >> 8*3, arg.colour >> 8*2, arg.colour >> 8*1, arg.colour >> 8*0);
 									auto brush = Gdiplus::SolidBrush(text_colour);
+									const int h = static_cast<int>(get_window()->get_height());
 									Gdiplus::FontFamily family(L"Arial");
 									Gdiplus::Font font(&family, arg.text_size, Gdiplus::FontStyleRegular, Gdiplus::UnitPixel);
 									Gdiplus::PointF point;
 									point.X = static_cast<float>(arg.location.x);
-									point.Y = static_cast<float>(arg.location.y);
+									point.Y = static_cast<float>(h - arg.location.y);
 									std::size_t len = std::strlen(arg.data);
 									std::wstring wstr;
 									wstr.resize(len);
