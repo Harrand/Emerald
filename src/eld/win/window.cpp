@@ -511,6 +511,16 @@ namespace eld
 									std::transform(arg.positions.begin(), arg.positions.end(), points.begin(), [&h](const Point& p){Gdiplus::PointF f; f.X = p.x; f.Y = h - p.y; return f;});
 									graphics.DrawPolygon(&pen, points.data(), points.size());
 								}
+								else if constexpr(std::is_same_v<T, DrawCommand<DrawPrimitive::FilledPolygon>>)
+								{
+									auto polygon_colour = Gdiplus::Color::MakeARGB(arg.colour >> 8*3, arg.colour >> 8*2, arg.colour >> 8*1, arg.colour >> 8*0);
+									const int h = static_cast<int>(get_window()->get_height());
+									auto brush = Gdiplus::SolidBrush(polygon_colour);
+									std::vector<Gdiplus::PointF> points;
+									points.resize(arg.positions.size());
+									std::transform(arg.positions.begin(), arg.positions.end(), points.begin(), [&h](const Point& p){Gdiplus::PointF f; f.X = p.x; f.Y = h - p.y; return f;});
+									graphics.FillPolygon(&brush, points.data(), points.size());
+								}
 								else
 								{
 									assert(false && "DrawCommand encountered with a primitive type that is not supported. Please submit a bug report.");

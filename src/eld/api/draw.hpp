@@ -17,6 +17,7 @@ namespace eld
 		Line,
 		Text,
 		Polygon,
+		FilledPolygon,
 	};
 
 	template<DrawPrimitive D>
@@ -50,7 +51,14 @@ namespace eld
 		unsigned int colour = 0xffffffff;
 	};
 
-	using DrawCommandVariant = std::variant<DrawCommand<DrawPrimitive::Line>, DrawCommand<DrawPrimitive::Text>, DrawCommand<DrawPrimitive::Polygon>>;
+	template<>
+	struct DrawCommand<DrawPrimitive::FilledPolygon>
+	{
+		std::vector<Point> positions;
+		unsigned int colour;
+	};
+
+	using DrawCommandVariant = std::variant<DrawCommand<DrawPrimitive::Line>, DrawCommand<DrawPrimitive::Text>, DrawCommand<DrawPrimitive::Polygon>, DrawCommand<DrawPrimitive::FilledPolygon>>;
 
 	class DrawCommandList
 	{
