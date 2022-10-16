@@ -328,6 +328,7 @@ namespace eld
 		}
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
+		SwapBuffers(this->hdc);
 	}
 
 	bool WindowWin32::is_close_requested() const

@@ -40,6 +40,8 @@ int main()
 
 	while(!wnd.is_close_requested())
 	{
+		glClearColor(1.0, 0.0, 1.0, 1.0);
+		glClear(GL_COLOR_BUFFER_BIT);
 		wnd.update();
 	}
 }
