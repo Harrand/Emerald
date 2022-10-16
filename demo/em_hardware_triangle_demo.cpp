@@ -147,7 +147,7 @@ int main()
 	{
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		// DRaw
+		// Draw
 		glUseProgram(program);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 
