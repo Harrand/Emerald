@@ -32,6 +32,10 @@ namespace eld
 	{
 		struct OpenGLDetails
 		{
+			int ogl_major_ver = 3;
+			int ogl_minor_ver = 3;
+			bool debug_context = false;
+			// todo: possibly support compat contexts?
 			bool double_buffer = true;
 			std::uint8_t colour_buffer_depth = 32;
 			std::uint8_t depth_buffer_size_bits = 24;

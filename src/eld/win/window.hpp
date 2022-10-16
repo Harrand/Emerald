@@ -49,6 +49,7 @@ namespace eld
 
 		HWND hwnd;
 		HDC hdc;
+		HGLRC modern_ogl_context = nullptr;
 		WindowRenderingIntent render_intent;
 		HardwareGraphicsAPI hardware_api;
 		bool close_requested = false;

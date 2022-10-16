@@ -10,13 +10,7 @@ namespace eld
 	class ContextWin32
 	{
 	public:
-		ContextWin32(HDC device_context);
-		ContextWin32(const ContextWin32& copy) = delete;
-		ContextWin32(ContextWin32&& move);
-		~ContextWin32();
-
-		ContextWin32& operator=(const ContextWin32& rhs) = delete;
-		ContextWin32& operator=(ContextWin32&& rhs);
+		ContextWin32(HDC device_context, HGLRC ctx);
 
 		static ContextWin32 null();
 		bool is_null() const;

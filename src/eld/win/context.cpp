@@ -21,35 +21,14 @@ namespace eld
 		}
 
 	}
-	ContextWin32::ContextWin32(HDC device_context):
-	ctx(wglCreateContext(device_context)),
+	ContextWin32::ContextWin32(HDC device_context, HGLRC ctx):
+	ctx(ctx),
 	device_ctx(device_context)
 	{
-		volatile int err = GetLastError();
 		assert(ctx != nullptr);
+		assert(device_context != nullptr);
 	}
 
-	ContextWin32::ContextWin32(ContextWin32&& move):
-	ctx(move.ctx),
-	device_ctx(move.device_ctx)
-	{
-		move.ctx = nullptr;
-	}
-
-	ContextWin32::~ContextWin32()
-	{
-		if(this->ctx != nullptr)
-		{
-			wglDeleteContext(this->ctx);
-		}
-	}
-
-	ContextWin32& ContextWin32::operator=(ContextWin32&& rhs)
-	{
-		win_impl::swap(this->ctx, rhs.ctx);
-		win_impl::swap(this->device_ctx, rhs.device_ctx);
-		return *this;
-	}
 
 	/*static*/ ContextWin32 ContextWin32::null()
 	{
@@ -63,7 +42,8 @@ namespace eld
 
 	bool ContextWin32::is_headless() const
 	{
-		return this->device_ctx == nullptr;
+		// TODO: implementation for headless contexts.
+		return false;
 	}
 
 	bool ContextWin32::is_current() const
@@ -73,6 +53,10 @@ namespace eld
 
 	void ContextWin32::make_current()
 	{
+		if(this->is_null())
+		{
+			assert(false && "Cannot make current the null context");
+		}
 		wglMakeCurrent(this->device_ctx, this->ctx);
 	}
 }

@@ -2,6 +2,12 @@
 #include "eld/context.hpp"
 #include <cassert>
 
+#if ELD_WIN
+	#include <gl/GL.h>
+#elif ELD_LINUX
+
+#endif
+
 int main()
 {
 	eld::Window wnd{eld::WindowInfo
@@ -12,7 +18,13 @@ int main()
 		.intent = eld::WindowRenderingIntent::HardwareAccelerated,
 		.details =
 		{
-			.hardware_api = eld::HardwareGraphicsAPI::OpenGL
+			.hardware_api = eld::HardwareGraphicsAPI::OpenGL,
+			.ogl_details =
+			{
+				.ogl_major_ver = 4,
+				.ogl_minor_ver = 5,
+				.debug_context = true,
+			}
 		}
 	}};
 
@@ -22,6 +34,7 @@ int main()
 	assert(!ctx.is_null());
 
 	ctx.make_current();
+	std::printf("OGL Version: %s", glGetString(GL_VERSION));
 	assert(ctx.is_current());
 	assert(!eld::Context::null().is_current());
 
