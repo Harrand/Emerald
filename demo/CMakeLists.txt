@@ -7,6 +7,15 @@ set_target_properties(em_window_demo PROPERTIES
 
 target_link_libraries(em_window_demo PRIVATE emerald)
 
+#em_hardware_triangle_demo
+add_executable(em_hardware_triangle_demo em_hardware_triangle_demo.cpp)
+set_target_properties(em_hardware_triangle_demo PROPERTIES
+	CXX_STANDARD 20
+	CXX_STANDARD_REQUIRED ON
+	CXX_EXTENSIONS OFF)
+
+target_link_libraries(em_hardware_triangle_demo PRIVATE emerald)
+
 #em_software_triangle_demo
 add_executable(em_software_triangle_demo em_software_triangle_demo.cpp)
 set_target_properties(em_software_triangle_demo PROPERTIES
