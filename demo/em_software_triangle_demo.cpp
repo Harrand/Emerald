@@ -13,30 +13,35 @@ int main()
 	}};
 
 	eld::SoftwareRenderer renderer;
-	renderer.get_command_list().add<eld::DrawPrimitive::FilledPolygon>
-	({
-		.positions =
-		{
-			{0, 0},
-			{1000, 0},
-			{1000, 1000},
-			{0, 1000}
-		},
-		.colour = 0xff0000ff
-	});
-	renderer.get_command_list().add<eld::DrawPrimitive::FilledPolygon>
-	({
-		.positions =
-		{
-			{200, 200},
-			{400, 500},
-			{600, 200}, 
-		},
-		.colour = 0xffff0000
-	});
+	auto update_commands = [&renderer, &wnd]()
+	{
+		renderer.get_command_list().clear();
+		renderer.get_command_list().add<eld::DrawPrimitive::FilledPolygon>
+		({
+			.positions =
+			{
+				{0, 0},
+				{static_cast<int>(wnd.get_width()), 0},
+				{static_cast<int>(wnd.get_width()), static_cast<int>(wnd.get_height())},
+				{0, static_cast<int>(wnd.get_height())}
+			},
+			.colour = 0xff0000ff
+		});
+		renderer.get_command_list().add<eld::DrawPrimitive::FilledPolygon>
+		({
+			.positions =
+			{
+				{200, 200},
+				{400, 500},
+				{600, 200}, 
+			},
+			.colour = 0xffff0000
+		});
+	};
 
 	while(!wnd.is_close_requested())
 	{
+		update_commands();
 		renderer.render(wnd);
 		wnd.update();
 	}

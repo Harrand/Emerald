@@ -466,7 +466,6 @@ namespace eld
 					if(get_window()->get_rendering_type() == WindowRenderingIntent::SoftwareRendering)
 					{
 						Gdiplus::Graphics graphics(hdc);
-						// TODO: Do software rendering.
 						for(const DrawCommandVariant& cmd : get_window()->impl_command_list().span())
 						{
 							std::visit([&graphics, &get_window](auto&& arg)

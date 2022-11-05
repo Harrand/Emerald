@@ -68,6 +68,10 @@ namespace eld
 		{
 			this->commands.push_back({cmd});
 		}
+		void clear()
+		{
+			this->commands.clear();
+		}
 
 		std::span<const DrawCommandVariant> span() const {return this->commands;}
 		std::span<DrawCommandVariant> span() {return this->commands;}
