@@ -61,6 +61,8 @@ namespace eld
 		WindowRenderingIntent intent;
 		/// Describes in more detail what type of rendering is expected to be done for the window. Failing to set the details properly will lead to serious runtime hazards.
 		WindowRenderingDetails details = {};
+		/// Whether the window should be headless or not. If headless, a window is not actually spawned, but a compatible context for headless OpenGL rendering can still be retrieved.
+		bool headless = false;
 	};
 
 	/**

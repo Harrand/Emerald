@@ -76,7 +76,8 @@ int main()
 				.ogl_minor_ver = 5,
 				.debug_context = true,
 			}
-		}
+		},
+		.headless = true
 	}};
 
 	assert(eld::Context::null().is_current());

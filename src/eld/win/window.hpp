@@ -55,6 +55,7 @@ namespace eld
 		bool close_requested = false;
 		mutable std::string window_text = "";
 		DrawCommandList software_draws = {};
+		void* headless = nullptr;
 	};
 
 	static_assert(WindowType<WindowWin32>);

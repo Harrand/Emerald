@@ -39,9 +39,17 @@ namespace eld
 		{
 			using wglCreateContextAttribsARB_t = HGLRC WINAPI(HDC, HGLRC, const int*);
 			using wglChoosePixelFormatARB_t = BOOL WINAPI(HDC, const int*, const FLOAT*, UINT, int*, UINT*);
+			using wglCreatePbufferARB_t = HPBUFFERARB WINAPI(HDC, int, int, int, const int*);
+			using wglGetPbufferDCARB_t = HDC WINAPI(HPBUFFERARB);
+			using wglReleasePbufferDCARB_t = int WINAPI(HPBUFFERARB, HDC);
+			using wglDestroyPbufferARB_t = BOOL WINAPI(HPBUFFERARB);
 
 			wglCreateContextAttribsARB_t* wgl_create_context_attribs_arb = nullptr;
 			wglChoosePixelFormatARB_t* wgl_choose_pixel_format_arb = nullptr;
+			wglCreatePbufferARB_t* wgl_create_pbuffer_arb = nullptr;
+			wglGetPbufferDCARB_t* wgl_get_pbuffer_dc_arb = nullptr;
+			wglReleasePbufferDCARB_t* wgl_release_pbuffer_dc_arb = nullptr;
+			wglDestroyPbufferARB_t* wgl_destroy_pbuffer_arb = nullptr;
 		};
 
 		static WGLExtensionFunctions wgl_ext = {};
@@ -108,6 +116,10 @@ namespace eld
 			}
 			wgl_ext.wgl_create_context_attribs_arb = reinterpret_cast<WGLExtensionFunctions::wglCreateContextAttribsARB_t*>(wglGetProcAddress("wglCreateContextAttribsARB"));
 			wgl_ext.wgl_choose_pixel_format_arb = reinterpret_cast<WGLExtensionFunctions::wglChoosePixelFormatARB_t*>(wglGetProcAddress("wglChoosePixelFormatARB"));
+			wgl_ext.wgl_create_pbuffer_arb = reinterpret_cast<WGLExtensionFunctions::wglCreatePbufferARB_t*>(wglGetProcAddress("wglCreatePbufferARB"));
+			wgl_ext.wgl_get_pbuffer_dc_arb = reinterpret_cast<WGLExtensionFunctions::wglGetPbufferDCARB_t*>(wglGetProcAddress("wglGetPbufferDCARB"));
+			wgl_ext.wgl_release_pbuffer_dc_arb = reinterpret_cast<WGLExtensionFunctions::wglReleasePbufferDCARB_t*>(wglGetProcAddress("wglReleasePbufferDCARB"));
+			wgl_ext.wgl_destroy_pbuffer_arb = reinterpret_cast<WGLExtensionFunctions::wglDestroyPbufferARB_t*>(wglGetProcAddress("wglDestroyPbufferARB"));
 			wglMakeCurrent(dummy_hdc, 0);
 			wglDeleteContext(dummy_context);
 		}
@@ -115,6 +127,12 @@ namespace eld
 
 	std::size_t WindowWin32::alive_window_count_hardware = 0;
 	std::size_t WindowWin32::alive_window_count_software = 0;
+
+	struct HeadlessData
+	{
+		HDC hdc = nullptr;
+		HPBUFFERARB pbuffer = nullptr;
+	};
 
 	WindowWin32::WindowWin32(WindowInfo info):
 	hwnd(nullptr),
@@ -160,7 +178,7 @@ namespace eld
 					WNDCLASSEXA wc
 					{
 						.cbSize = sizeof(WNDCLASSEXA),
-						.style = CS_OWNDC,
+						.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC,
 						.lpfnWndProc = win_impl::wnd_proc,
 						.cbClsExtra = 0,
 						.cbWndExtra = 0,
@@ -230,6 +248,19 @@ namespace eld
 				assert(false && "Found a suitable pixel format for modern opengl, but failed to set it. Please submit a bug report.");
 			}
 
+			// If we're headless, we're gonna make a pbuffer here and use that HDC instead.
+			if(info.headless)
+			{
+				auto* h = new HeadlessData;
+				this->headless = h;
+			
+				volatile auto olderr = GetLastError();
+				h->hdc = CreateCompatibleDC(this->hdc);
+				h->pbuffer = win_impl::wgl_ext.wgl_create_pbuffer_arb(h->hdc, pixel_format, static_cast<int>(info.width), static_cast<int>(info.height), nullptr);
+				volatile auto err = GetLastError();
+				assert(h->pbuffer && "Failed to create headless pbuffer");
+			}
+
 			int modern_ogl_attribs[] =
 			{
 				WGL_CONTEXT_MAJOR_VERSION_ARB, info.details.ogl_details.ogl_major_ver,
@@ -264,6 +295,12 @@ namespace eld
 
 	WindowWin32::~WindowWin32()
 	{
+		if(this->headless != nullptr)
+		{
+			delete reinterpret_cast<HeadlessData*>(this->headless);
+			this->headless = nullptr;
+		}
+
 		if(this->hwnd != nullptr)
 		{
 			this->on_death();
@@ -458,13 +495,13 @@ namespace eld
 				break;
 				case WM_PAINT:
 				{
-					// Draw with whatever colour is in the user settings.
-					PAINTSTRUCT ps;
-					HDC hdc = BeginPaint(hwnd, &ps);
-					FillRect(hdc, &ps.rcPaint, CreateSolidBrush(RGB(0, 0, 0)));
-
 					if(get_window()->get_rendering_type() == WindowRenderingIntent::SoftwareRendering)
 					{
+						// Draw with whatever colour is in the user settings.
+						PAINTSTRUCT ps;
+						HDC hdc = BeginPaint(hwnd, &ps);
+						FillRect(hdc, &ps.rcPaint, CreateSolidBrush(RGB(0, 0, 0)));
+
 						Gdiplus::Graphics graphics(hdc);
 						for(const DrawCommandVariant& cmd : get_window()->impl_command_list().span())
 						{
@@ -526,9 +563,9 @@ namespace eld
 								}
 							}, cmd);
 						}
+						EndPaint(hwnd, &ps);
 					}
 
-					EndPaint(hwnd, &ps);
 					return FALSE;
 				}
 				break;
