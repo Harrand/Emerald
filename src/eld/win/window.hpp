@@ -15,8 +15,6 @@ namespace eld
 	class WindowWin32
 	{
 	public:
-		static std::size_t alive_window_count_hardware;
-		static std::size_t alive_window_count_software;
 		WindowWin32(WindowInfo info);
 		WindowWin32(const WindowWin32& copy) = delete;
 		WindowWin32(WindowWin32&& move);
@@ -41,6 +39,9 @@ namespace eld
 
 		DrawCommandList& impl_command_list();
 	private:
+		static std::size_t alive_window_count_hardware;
+		static std::size_t alive_window_count_software;
+		
 		std::pair<int, int> get_window_size() const;
 		MSG get_message();
 		HDC get_hdc() const;

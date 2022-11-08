@@ -28,7 +28,6 @@ namespace eld
 		};
 
 		static SoftwareRenderingInfo sw_info = {};
-
 		LRESULT wnd_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 		WindowWin32* get_window(HWND hwnd)
 		{
@@ -46,75 +45,8 @@ namespace eld
 
 		static WGLExtensionFunctions wgl_ext = {};
 
-		void fill_wgl_ext(const WindowRenderingDetails::OpenGLDetails& ogl_details, HDC dummy_hdc)
-		{
-			if(wgl_ext.wgl_choose_pixel_format_arb != nullptr || wgl_ext.wgl_create_context_attribs_arb != nullptr)
-			{
-				assert(wgl_ext.wgl_choose_pixel_format_arb != nullptr && wgl_ext.wgl_create_context_attribs_arb != nullptr && "Attempting to do early-out from wgl extension functions as at least one of them isnt nullptr. However, the other is, which should be impossible. Please submit a bug report. We are almost certainly about to crash.");
-				return;
-			}
-			// Assumptions:
-			// User has requested a hardware-accelerated window (OGL specifically). We want to make a modern OGL context, so we need WGL extension functions, which can only be retrieved with also an OGL context. We will make a quick headless dummy context, load those function pointers, fill the struct and then kill our dummy context.
-			// Requirements:
-			// - We only wanna do this once.
-
-			// Create dummy context.
-			PIXELFORMATDESCRIPTOR pfd
-			{
-				.nSize = sizeof(PIXELFORMATDESCRIPTOR),
-				.nVersion = 1,
-				.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL,
-				.iPixelType = PFD_TYPE_RGBA,
-				.cColorBits = ogl_details.colour_buffer_depth,
-				.cRedBits = 0,
-				.cRedShift = 0,
-				.cGreenBits = 0,
-				.cGreenShift = 0,
-				.cBlueBits = 0,
-				.cBlueShift = 0,
-				.cAlphaBits = 0,
-				.cAlphaShift = 0,
-				.cAccumBits = 0,
-				.cAccumRedBits = 0,
-				.cAccumGreenBits = 0,
-				.cAccumBlueBits = 0,
-				.cAccumAlphaBits = 0,
-				.cDepthBits = ogl_details.depth_buffer_size_bits,
-				.cStencilBits = ogl_details.stencil_buffer_size_bits,
-				.cAuxBuffers = 0,
-				.iLayerType = PFD_MAIN_PLANE,
-				.bReserved = 0,
-				.dwLayerMask = 0,
-				.dwVisibleMask = 0,
-				.dwDamageMask = 0
-			};
-			if(ogl_details.double_buffer)
-			{
-				pfd.dwFlags |= PFD_DOUBLEBUFFER;
-			}
-
-			int pixel_format = ChoosePixelFormat(dummy_hdc, &pfd);
-			assert(pixel_format && "Failed to find suitable pixel format for dummy ogl context. Your machine probably doesn't support OpenGL at all, sorry.");
-			{
-				int ret = SetPixelFormat(dummy_hdc, pixel_format, &pfd);
-				assert(ret && "Failed to set pixel format for dummy OGL context. The pixel format was however available. Your machine is probably configured in a really weird way. Try submitting a bug report.");
-			}
-			HGLRC dummy_context = wglCreateContext(dummy_hdc);
-			assert(dummy_context && "Failed to create OGL dummy context. Your machine probably doesn't support OGL, sorry (hint: could be headless related?)");
-			if(!wglMakeCurrent(dummy_hdc, dummy_context))
-			{
-				volatile auto err = GetLastError();
-				assert(false && "Failed to activate dummy OGL context.");
-			}
-			wgl_ext.wgl_create_context_attribs_arb = reinterpret_cast<WGLExtensionFunctions::wglCreateContextAttribsARB_t*>(wglGetProcAddress("wglCreateContextAttribsARB"));
-			wgl_ext.wgl_choose_pixel_format_arb = reinterpret_cast<WGLExtensionFunctions::wglChoosePixelFormatARB_t*>(wglGetProcAddress("wglChoosePixelFormatARB"));
-			wglMakeCurrent(dummy_hdc, 0);
-			wglDeleteContext(dummy_context);
-		}
+		void fill_wgl_ext(const WindowRenderingDetails::OpenGLDetails& ogl_details, HDC dummy_hdc);
 	}
-
-	std::size_t WindowWin32::alive_window_count_hardware = 0;
-	std::size_t WindowWin32::alive_window_count_software = 0;
 
 	WindowWin32::WindowWin32(WindowInfo info):
 	hwnd(nullptr),
@@ -552,6 +484,78 @@ namespace eld
 				break;
 			}
 			return DefWindowProc(hwnd, msg, wparam, lparam);
+		}
+	}
+
+	std::size_t WindowWin32::alive_window_count_hardware = 0;
+	std::size_t WindowWin32::alive_window_count_software = 0;
+
+	namespace win_impl
+	{
+		void fill_wgl_ext(const WindowRenderingDetails::OpenGLDetails& ogl_details, HDC dummy_hdc)
+		{
+			if(wgl_ext.wgl_choose_pixel_format_arb != nullptr || wgl_ext.wgl_create_context_attribs_arb != nullptr)
+			{
+				assert(wgl_ext.wgl_choose_pixel_format_arb != nullptr && wgl_ext.wgl_create_context_attribs_arb != nullptr && "Attempting to do early-out from wgl extension functions as at least one of them isnt nullptr. However, the other is, which should be impossible. Please submit a bug report. We are almost certainly about to crash.");
+				return;
+			}
+			// Assumptions:
+			// User has requested a hardware-accelerated window (OGL specifically). We want to make a modern OGL context, so we need WGL extension functions, which can only be retrieved with also an OGL context. We will make a quick headless dummy context, load those function pointers, fill the struct and then kill our dummy context.
+			// Requirements:
+			// - We only wanna do this once.
+
+			// Create dummy context.
+			PIXELFORMATDESCRIPTOR pfd
+			{
+				.nSize = sizeof(PIXELFORMATDESCRIPTOR),
+				.nVersion = 1,
+				.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL,
+				.iPixelType = PFD_TYPE_RGBA,
+				.cColorBits = ogl_details.colour_buffer_depth,
+				.cRedBits = 0,
+				.cRedShift = 0,
+				.cGreenBits = 0,
+				.cGreenShift = 0,
+				.cBlueBits = 0,
+				.cBlueShift = 0,
+				.cAlphaBits = 0,
+				.cAlphaShift = 0,
+				.cAccumBits = 0,
+				.cAccumRedBits = 0,
+				.cAccumGreenBits = 0,
+				.cAccumBlueBits = 0,
+				.cAccumAlphaBits = 0,
+				.cDepthBits = ogl_details.depth_buffer_size_bits,
+				.cStencilBits = ogl_details.stencil_buffer_size_bits,
+				.cAuxBuffers = 0,
+				.iLayerType = PFD_MAIN_PLANE,
+				.bReserved = 0,
+				.dwLayerMask = 0,
+				.dwVisibleMask = 0,
+				.dwDamageMask = 0
+			};
+			if(ogl_details.double_buffer)
+			{
+				pfd.dwFlags |= PFD_DOUBLEBUFFER;
+			}
+
+			int pixel_format = ChoosePixelFormat(dummy_hdc, &pfd);
+			assert(pixel_format && "Failed to find suitable pixel format for dummy ogl context. Your machine probably doesn't support OpenGL at all, sorry.");
+			{
+				int ret = SetPixelFormat(dummy_hdc, pixel_format, &pfd);
+				assert(ret && "Failed to set pixel format for dummy OGL context. The pixel format was however available. Your machine is probably configured in a really weird way. Try submitting a bug report.");
+			}
+			HGLRC dummy_context = wglCreateContext(dummy_hdc);
+			assert(dummy_context && "Failed to create OGL dummy context. Your machine probably doesn't support OGL, sorry (hint: could be headless related?)");
+			if(!wglMakeCurrent(dummy_hdc, dummy_context))
+			{
+				volatile auto err = GetLastError();
+				assert(false && "Failed to activate dummy OGL context.");
+			}
+			wgl_ext.wgl_create_context_attribs_arb = reinterpret_cast<WGLExtensionFunctions::wglCreateContextAttribsARB_t*>(wglGetProcAddress("wglCreateContextAttribsARB"));
+			wgl_ext.wgl_choose_pixel_format_arb = reinterpret_cast<WGLExtensionFunctions::wglChoosePixelFormatARB_t*>(wglGetProcAddress("wglChoosePixelFormatARB"));
+			wglMakeCurrent(dummy_hdc, 0);
+			wglDeleteContext(dummy_context);
 		}
 	}
 }
