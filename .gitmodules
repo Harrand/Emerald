@@ -1,0 +1,3 @@
+[submodule "lib/HDK"]
+	path = lib/HDK
+	url = https://github.com/Harrand/HDK

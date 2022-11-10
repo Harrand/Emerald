@@ -1,6 +1,6 @@
 #if ELD_WIN
+#include "hdk/debug.hpp"
 #include "eld/win/context.hpp"
-#include <cassert>
 
 namespace eld
 {
@@ -25,8 +25,8 @@ namespace eld
 	ctx(ctx),
 	device_ctx(device_context)
 	{
-		assert(ctx != nullptr);
-		assert(device_context != nullptr);
+		hdk::assert(ctx != nullptr);
+		hdk::assert(device_context != nullptr);
 	}
 
 
@@ -55,7 +55,7 @@ namespace eld
 	{
 		if(this->is_null())
 		{
-			assert(false && "Cannot make current the null context");
+			hdk::error("Cannot make current the null context");
 		}
 		wglMakeCurrent(this->device_ctx, this->ctx);
 	}

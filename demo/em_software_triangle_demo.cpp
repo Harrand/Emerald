@@ -1,3 +1,4 @@
+#include "hdk/debug.hpp"
 #include "eld/window.hpp"
 #include "eld/context.hpp"
 #include "eld/software_renderer.hpp"

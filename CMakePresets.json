@@ -1,0 +1,46 @@
+{
+	"version": 3,
+	"cmakeMinimumRequired":
+	{
+		"major": 3,
+		"minor": 21,
+		"patch": 0
+	},
+	"configurePresets":
+	[
+	{
+		"name": "debug",
+		"binaryDir": "${sourceDir}/build/${hostSystemName}_debug",
+		"cacheVariables":
+		{
+			"CMAKE_BUILD_TYPE":
+			{
+				"type": "string",
+				"value": "Debug"
+			},
+			"EMERALD_BUILDCONFIG":
+			{
+				"type": "string",
+				"value": "debug"
+			}
+		}
+	},
+	{
+		"name": "release",
+		"binaryDir": "${sourceDir}/build/${hostSystemName}_release",
+		"cacheVariables":
+		{
+			"CMAKE_BUILD_TYPE":
+			{
+				"type": "string",
+				"value": "Release"
+			},
+			"EMERALD_BUILDCONFIG":
+			{
+				"type": "string",
+				"value": "release"
+			}
+		}
+	}
+	]
+}

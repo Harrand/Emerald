@@ -1,10 +1,10 @@
 #if ELD_WIN
 #define OEMRESOURCE
+#include "hdk/debug.hpp"
 #include "eld/win/window.hpp"
 #include <cstddef>
 #include <cstring>
 #include <utility>
-#include <cassert>
 #include <algorithm>
 #include <gdiplus.h>
 
@@ -109,7 +109,7 @@ namespace eld
 				}
 			break;
 			default:
-				assert(false && "Unrecognised WindowRenderingIntent");
+				hdk::error("Unrecognised WindowRenderingIntent");
 			break;
 		}
 
@@ -125,7 +125,7 @@ namespace eld
 			GetModuleHandle(nullptr),
 			this
 		);
-		assert(this->hwnd != nullptr);
+		hdk::assert(this->hwnd != nullptr);
 		this->on_alive();
 
 		this->hdc = GetDC(this->hwnd);
@@ -154,12 +154,12 @@ namespace eld
 			int pixel_format;
 			UINT num_formats;
 			win_impl::wgl_ext.wgl_choose_pixel_format_arb(this->hdc, pixel_format_attribs, 0, 1, &pixel_format, &num_formats);
-			assert(num_formats > 0 && "Could not find a suitable pixel format for the ogl version specified. Your machine probably doesn't support this version of OGL.");
+			hdk::assert(num_formats > 0, "Could not find a suitable pixel format for the ogl version specified. Your machine probably doesn't support this version of OGL.");
 			PIXELFORMATDESCRIPTOR pfd;
 			DescribePixelFormat(this->hdc, pixel_format, sizeof(pfd), &pfd);
 			if(!SetPixelFormat(this->hdc, pixel_format, &pfd))
 			{
-				assert(false && "Found a suitable pixel format for modern opengl, but failed to set it. Please submit a bug report.");
+				hdk::error("Found a suitable pixel format for modern opengl, but failed to set it. Please submit a bug report.");
 			}
 
 			int modern_ogl_attribs[] =
@@ -176,7 +176,7 @@ namespace eld
 				modern_ogl_attribs[7] = WGL_CONTEXT_DEBUG_BIT_ARB;
 			}
 			this->modern_ogl_context = win_impl::wgl_ext.wgl_create_context_attribs_arb(this->hdc, 0, modern_ogl_attribs);
-			assert(this->modern_ogl_context && "Failed to create modern ogl context. Perhaps your machine does not support the version requested?");
+			hdk::assert(this->modern_ogl_context, "Failed to create modern ogl context. Perhaps your machine does not support the version requested?");
 
 		}
 	}
@@ -224,7 +224,7 @@ namespace eld
 	void WindowWin32::set_width(unsigned int w)
 	{
 		bool res = SetWindowPos(this->hwnd, nullptr, 0, 0, static_cast<int>(w), this->get_window_size().second, SWP_NOMOVE);
-		assert(res);
+		hdk::assert(res);
 	}
 
 	unsigned int WindowWin32::get_height() const
@@ -235,7 +235,7 @@ namespace eld
 	void WindowWin32::set_height(unsigned int h)
 	{
 		bool res = SetWindowPos(this->hwnd, nullptr, 0, 0, this->get_window_size().first, static_cast<int>(h), SWP_NOMOVE);
-		assert(res);
+		hdk::assert(res);
 	}
 
 	const char* WindowWin32::get_title() const
@@ -281,7 +281,7 @@ namespace eld
 
 	ContextWin32 WindowWin32::get_context() const
 	{
-		assert(this->get_rendering_type() == WindowRenderingIntent::HardwareAccelerated && this->hardware_api == HardwareGraphicsAPI::OpenGL && "In order to retrieve an OGL context, the window must support hardware-accelerated rendering and the chosen API must be OpenGL");
+		hdk::assert(this->get_rendering_type() == WindowRenderingIntent::HardwareAccelerated && this->hardware_api == HardwareGraphicsAPI::OpenGL, "In order to retrieve an OGL context, the window must support hardware-accelerated rendering and the chosen API must be OpenGL");
 		return {this->hdc, this->modern_ogl_context};
 	}
 
@@ -330,7 +330,7 @@ namespace eld
 				WindowWin32::alive_window_count_hardware++;
 			break;
 			default:
-				assert(false);
+				hdk::error();
 			break;
 		}
 	}
@@ -340,7 +340,7 @@ namespace eld
 		switch(this->get_rendering_type())
 		{
 			case WindowRenderingIntent::SoftwareRendering:
-				assert(WindowWin32::alive_window_count_software > 0);
+				hdk::assert(WindowWin32::alive_window_count_software > 0);
 				WindowWin32::alive_window_count_software--;
 				if(WindowWin32::alive_window_count_software == 0)
 				{
@@ -351,7 +351,7 @@ namespace eld
 				}
 			break;
 			case WindowRenderingIntent::HardwareAccelerated:
-				assert(WindowWin32::alive_window_count_hardware > 0);
+				hdk::assert(WindowWin32::alive_window_count_hardware > 0);
 				WindowWin32::alive_window_count_hardware--;
 				if(WindowWin32::alive_window_count_hardware == 0)
 				{
@@ -360,7 +360,7 @@ namespace eld
 				}
 			break;
 			default:
-				assert(false);
+				hdk::error();
 			break;
 		}
 	}
@@ -373,7 +373,7 @@ namespace eld
 			auto get_window = [hwnd]()
 			{
 				WindowWin32* wnd = win_impl::get_window(hwnd);
-				assert(wnd != nullptr && "WindowWin32 userdata not setup properly. userdata was nullptr.");
+				hdk::assert(wnd != nullptr, "WindowWin32 userdata not setup properly. userdata was nullptr.");
 				return wnd;
 			};
 
@@ -454,7 +454,7 @@ namespace eld
 								}
 								else
 								{
-									assert(false && "DrawCommand encountered with a primitive type that is not supported. Please submit a bug report.");
+									hdk::assert(false && "DrawCommand encountered with a primitive type that is not supported. Please submit a bug report.");
 								}
 							}, cmd);
 						}
@@ -496,7 +496,7 @@ namespace eld
 		{
 			if(wgl_ext.wgl_choose_pixel_format_arb != nullptr || wgl_ext.wgl_create_context_attribs_arb != nullptr)
 			{
-				assert(wgl_ext.wgl_choose_pixel_format_arb != nullptr && wgl_ext.wgl_create_context_attribs_arb != nullptr && "Attempting to do early-out from wgl extension functions as at least one of them isnt nullptr. However, the other is, which should be impossible. Please submit a bug report. We are almost certainly about to crash.");
+				hdk::assert(wgl_ext.wgl_choose_pixel_format_arb != nullptr && wgl_ext.wgl_create_context_attribs_arb != nullptr, "Attempting to do early-out from wgl extension functions as at least one of them isnt nullptr. However, the other is, which should be impossible. Please submit a bug report. We are almost certainly about to crash.");
 				return;
 			}
 			// Assumptions:
@@ -540,17 +540,17 @@ namespace eld
 			}
 
 			int pixel_format = ChoosePixelFormat(dummy_hdc, &pfd);
-			assert(pixel_format && "Failed to find suitable pixel format for dummy ogl context. Your machine probably doesn't support OpenGL at all, sorry.");
+			hdk::assert(pixel_format, "Failed to find suitable pixel format for dummy ogl context. Your machine probably doesn't support OpenGL at all, sorry.");
 			{
 				int ret = SetPixelFormat(dummy_hdc, pixel_format, &pfd);
-				assert(ret && "Failed to set pixel format for dummy OGL context. The pixel format was however available. Your machine is probably configured in a really weird way. Try submitting a bug report.");
+				hdk::assert(ret, "Failed to set pixel format for dummy OGL context. The pixel format was however available. Your machine is probably configured in a really weird way. Try submitting a bug report.");
 			}
 			HGLRC dummy_context = wglCreateContext(dummy_hdc);
-			assert(dummy_context && "Failed to create OGL dummy context. Your machine probably doesn't support OGL, sorry (hint: could be headless related?)");
+			hdk::assert(dummy_context, "Failed to create OGL dummy context. Your machine probably doesn't support OGL, sorry (hint: could be headless related?)");
 			if(!wglMakeCurrent(dummy_hdc, dummy_context))
 			{
 				volatile auto err = GetLastError();
-				assert(false && "Failed to activate dummy OGL context.");
+				hdk::error("Failed to activate dummy OGL context.");
 			}
 			wgl_ext.wgl_create_context_attribs_arb = reinterpret_cast<WGLExtensionFunctions::wglCreateContextAttribsARB_t*>(wglGetProcAddress("wglCreateContextAttribsARB"));
 			wgl_ext.wgl_choose_pixel_format_arb = reinterpret_cast<WGLExtensionFunctions::wglChoosePixelFormatARB_t*>(wglGetProcAddress("wglChoosePixelFormatARB"));

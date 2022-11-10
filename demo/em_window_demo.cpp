@@ -1,6 +1,5 @@
 #include "eld/window.hpp"
 #include "eld/context.hpp"
-#include <cassert>
 
 int main()
 {

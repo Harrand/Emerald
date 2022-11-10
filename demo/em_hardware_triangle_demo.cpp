@@ -1,6 +1,6 @@
+#include "hdk/debug.hpp"
 #include "eld/window.hpp"
 #include "eld/context.hpp"
-#include <cassert>
 #include <wingdi.h>
 
 void* GetAnyGLFuncAddress(const char* name);
@@ -79,15 +79,15 @@ int main()
 		}
 	}};
 
-	assert(eld::Context::null().is_current());
+	hdk::assert(eld::Context::null().is_current());
 
 	eld::Context ctx = wnd.get_context();
-	assert(!ctx.is_null());
+	hdk::assert(!ctx.is_null());
 
 	ctx.make_current();
 	std::printf("OGL Version: %s", glGetString(GL_VERSION));
-	assert(ctx.is_current());
-	assert(!eld::Context::null().is_current());
+	hdk::assert(ctx.is_current());
+	hdk::assert(!eld::Context::null().is_current());
 	
 	// OGL 4.5 stuff.
 	load_ogl_funcs();
@@ -121,7 +121,7 @@ int main()
 	glCompileShader(vertex_shader);
 	int success_v;
 	glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &success_v);
-	assert(success_v && "Failed to compile vertex shader");
+	hdk::assert(success_v, "Failed to compile vertex shader");
 
 
 	GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -129,7 +129,7 @@ int main()
 	glCompileShader(fragment_shader);
 	int success_f;
 	glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &success_f);
-	assert(success_f && "Failed to compile fragment shader");
+	hdk::assert(success_f, "Failed to compile fragment shader");
 
 	GLuint program = glCreateProgram();
 	glAttachShader(program, vertex_shader);
@@ -137,9 +137,9 @@ int main()
 	glLinkProgram(program);
 	int success_p;
 	glGetProgramiv(program, GL_LINK_STATUS, &success_p);
-	assert(success_p && "Failed to link shader program");
+	hdk::assert(success_p, "Failed to link shader program");
 	glGetProgramiv(program, GL_VALIDATE_STATUS, &success_p);
-	assert(success_p && "Failed to validate shader program");
+	hdk::assert(success_p, "Failed to validate shader program");
 
 	glClearColor(0.0, 0.0, 1.0, 1.0);
 
